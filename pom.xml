@@ -71,6 +71,8 @@
     <module>tests</module>
     <module>native-io</module>
     <module>testtools</module>
+    <module>test-jacoco</module>
+
   </modules>
   <mailingLists>
     <mailingList>
@@ -145,6 +147,8 @@
     <jmock.version>2.8.2</jmock.version>
     <jsoup.version>1.14.3</jsoup.version>
     <junit.version>4.12</junit.version>
+
+
     <!-- required by zookeeper test utilities imported from ZooKeeper -->
     <junit5.version>5.8.2</junit5.version>
     <libthrift.version>0.14.2</libthrift.version>
@@ -200,6 +204,7 @@
     <maven-shade-plugin.version>3.2.0</maven-shade-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+
     <dependency-check-maven.version>8.0.2</dependency-check-maven.version>
     <nar-maven-plugin.version>3.10.1</nar-maven-plugin.version>
     <os-maven-plugin.version>1.4.1.Final</os-maven-plugin.version>
@@ -211,6 +216,16 @@
     <rxjava.version>3.0.1</rxjava.version>
     <maven-failsafe-plugin.version>3.0.0-M6</maven-failsafe-plugin.version>
     <awaitility.version>4.0.3</awaitility.version>
+
+
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <maven.compiler.target>1.8</maven.compiler.target>
+      <maven.compiler.source>1.8</maven.compiler.source>
+      <sonar.coverage.jacoco.xmlReportPaths>bookkeeper/test-jacoco/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+      <sonar.organization>ariannaquinci</sonar.organization>
+      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
   </properties>
 
   <!-- dependency definitions -->
@@ -222,16 +237,25 @@
         <artifactId>spotbugs-annotations</artifactId>
         <version>${spotbugs-annotations.version}</version>
       </dependency>
+
+
       <dependency>
         <groupId>javax.annotation</groupId>
         <artifactId>javax.annotation-api</artifactId>
         <version>${javax-annotations-api.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>3.12.4</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
         <version>${google.code.version}</version>
       </dependency>
+
       <dependency>
         <groupId>com.google.errorprone</groupId>
         <artifactId>error_prone_annotations</artifactId>
@@ -542,6 +566,12 @@
         <version>${junit5.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+        <scope>test</scope>
+      </dependency>
       <dependency>
          <!-- needed by ZooKeeper server -->
          <groupId>org.xerial.snappy</groupId>
@@ -871,7 +901,42 @@
       </extension>
     </extensions>
     <pluginManagement>
+
       <plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.9.1</version>
+
+
+
+
+
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.10</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.1.0</version>
+          <executions>
+            <execution>
+            <goals>
+            <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -886,7 +951,7 @@
           <configuration>
             <configLocation>buildtools/src/main/resources/bookkeeper/checkstyle.xml</configLocation>
             <suppressionsLocation>buildtools/src/main/resources/bookkeeper/suppressions.xml</suppressionsLocation>
-            <encoding>UTF-8</encoding>
+            <!--<encoding>UTF-8</encoding>-->
             <consoleOutput>true</consoleOutput>
             <failOnViolation>true</failOnViolation>
             <includeResources>false</includeResources>
@@ -910,7 +975,7 @@
         <artifactId>spotbugs-maven-plugin</artifactId>
         <version>${spotbugs-maven-plugin.version}</version>
         <configuration>
-          <excludeFilterFile>${session.executionRootDirectory}/buildtools/src/main/resources/bookkeeper/findbugsExclude.xml</excludeFilterFile>
+         <!-- <excludeFilterFile>${session.executionRootDirectory}/buildtools/src/main/resources/bookkeeper/findbugsExclude.xml</excludeFilterFile>-->
         </configuration>
       </plugin>
       <plugin>
@@ -1101,6 +1166,28 @@
   </build>
   <profiles>
     <profile>
+      <id>coverage</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>owasp-dependency-check</id>
       <build>
         <plugins>
@@ -1218,12 +1305,14 @@
       <id>dev-debug</id>
       <build>
         <plugins>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${maven-surefire-plugin.version}</version>
             <configuration>
-              <argLine>-Xmx2G -Djava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid -Dbookkeeper.log.root.level=INFO -Dbookkeeper.log.root.appender=CONSOLE</argLine>
+              <argLine>javaagent:/home/morghi/ISW2/badua/lib/ba-dua-agent-rt-0.8.0-all.jar</argLine>
+              <argLine>Xbootclasspath/p:/home/morghi/ISW2/badua/lib/ba-dua-agent-rt-0.8.0-all.jar</argLine>
               <redirectTestOutputToFile>false</redirectTestOutputToFile>
               <forkCount>${forkCount.variable}</forkCount>
               <reuseForks>false</reuseForks>
@@ -1231,9 +1320,12 @@
               <trimStackTrace>false</trimStackTrace>
             </configuration>
           </plugin>
+
         </plugins>
       </build>
+
     </profile>
+
     <profile>
       <id>aarch64-linux-nar-aol</id>
       <activation>
