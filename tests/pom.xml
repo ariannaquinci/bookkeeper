@@ -55,7 +55,8 @@
     <module>integration-tests-topologies</module>
     <module>backward-compat</module>
     <module>integration</module>
-    <module>scripts</module>
+
+    <module>mytests</module>
   </modules>
   <build>
     <plugins>
