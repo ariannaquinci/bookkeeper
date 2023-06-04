@@ -56,7 +56,6 @@
     <module>backward-compat</module>
     <module>integration</module>
 
-    <module>mytests</module>
   </modules>
   <build>
     <plugins>

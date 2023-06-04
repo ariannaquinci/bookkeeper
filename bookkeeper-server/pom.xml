@@ -25,10 +25,18 @@
   <artifactId>bookkeeper-server</artifactId>
   <name>Apache BookKeeper :: Server</name>
   <dependencies>
+
     <dependency>
       <groupId>org.apache.bookkeeper</groupId>
       <artifactId>bookkeeper-common</artifactId>
       <version>${project.parent.version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>5.3.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.bookkeeper</groupId>
@@ -223,8 +231,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
+
     <plugins>
+      <!-- Plugin per l'unpacking delle dipendenze -->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -308,6 +320,8 @@
     </plugins>
   </build>
   <profiles>
+
+
     <profile>
       <id>vertx-http-server</id>
       <dependencies>
@@ -318,6 +332,7 @@
         </dependency>
       </dependencies>
     </profile>
+
     <profile>
       <id>tls-certs</id>
       <build>
@@ -342,6 +357,8 @@
         </plugins>
       </build>
     </profile>
+    <!--Ba-dua coverage-->
+
     <!-- test profiles -->
     <profile>
       <id>skipBookKeeperServerTests</id>
@@ -362,5 +379,6 @@
         </plugins>
       </build>
     </profile>
-  </profiles>
+
+    </profiles>
 </project>

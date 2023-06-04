@@ -903,19 +903,6 @@
 
         </plugin>
 
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.6</version>
-
-          <executions>
-            <execution>
-              <goals>
-                <goal>prepare-agent</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -995,7 +982,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
         <configuration>
-         <!-- <argLine>-Xmx2G -Djava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid ${test.additional.args}</argLine>-->
+          <!-- <argLine>-Xmx2G -Djava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid ${test.additional.args}</argLine>-->
           <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
           <forkCount>${forkCount.variable}</forkCount>
           <reuseForks>false</reuseForks>
@@ -1176,7 +1163,7 @@
             <version>${maven-surefire-plugin.version}</version>
             <configuration>
 
-             <!-- <argLine>@{argLine} -Xmx2G -Djava.net.preferIPv4Stack=true</argLine>-->
+              <!-- <argLine>@{argLine} -Xmx2G -Djava.net.preferIPv4Stack=true</argLine>-->
               <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
               <forkCount>${forkCount.variable}</forkCount>
               <reuseForks>false</reuseForks>
@@ -1187,20 +1174,7 @@
               </includes>
             </configuration>
           </plugin>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.6</version>
 
-            <executions>
-              <execution>
-                <id>prepare-agent</id>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
@@ -1341,10 +1315,52 @@
               <trimStackTrace>false</trimStackTrace>
             </configuration>
           </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>pre-test</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>post-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
 
         </plugins>
       </build>
 
+    </profile>
+    <profile>
+      <id>jacoco-cov</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
@@ -1418,5 +1434,6 @@
         </plugins>
       </build>
     </profile>
+
   </profiles>
 </project>
