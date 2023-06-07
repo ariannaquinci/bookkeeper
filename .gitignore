@@ -16,7 +16,7 @@
 .DS_Store
 
 # Maven
-lib/
+bookkeeper-server/lib/
 log/
 target/
 dependency-reduced-pom.xml
