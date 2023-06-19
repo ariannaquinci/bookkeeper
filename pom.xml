@@ -736,6 +736,7 @@
         <version>${mockito.version}</version>
       </dependency>
 
+
       <dependency>
         <groupId>org.powermock</groupId>
         <artifactId>powermock-api-mockito2</artifactId>
@@ -896,19 +897,14 @@
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.9.1</version>
-
-
-
-
-
         </plugin>
 
 
-        <plugin>
+     <!--   <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven-surefire-plugin.version}</version>
-        </plugin>
+        </plugin>-->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
