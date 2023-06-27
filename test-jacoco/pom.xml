@@ -18,7 +18,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-benchmark</artifactId>
             <version>${project.parent.version}</version>
@@ -37,13 +37,13 @@
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-proto</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>bookkeeper-server</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
+ <!--       <dependency>
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>circe-checksum</artifactId>
             <version>${project.parent.version}</version>
@@ -177,7 +177,7 @@
             <groupId>org.apache.bookkeeper</groupId>
             <artifactId>stream-storage-cli</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
