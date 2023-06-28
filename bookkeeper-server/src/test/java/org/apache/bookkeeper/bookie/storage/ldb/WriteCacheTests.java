@@ -256,7 +256,7 @@ public class WriteCacheTests {
         }
 
     }
-    /*
+
     //WHITE BOX APPROACH
     @RunWith(Parameterized.class)
     public static class whiteboxPutTests{
@@ -366,7 +366,7 @@ public class WriteCacheTests {
            }
        }
     }
-*/
+
 }
 
 

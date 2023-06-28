@@ -479,11 +479,13 @@
     </profile>
 
     <profile>
-      <id>mutation-cov</id>
+      <id>mutation-cov </id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
       <properties>
+        <!-- For incremental analysis this should be commented out -->
+        <!-- <withHistory>true</withHistory> -->
 
         <pitest.history.file>${project.build.directory}/pitest.history</pitest.history.file>
       </properties>
@@ -495,14 +497,12 @@
             <version>1.8.0</version>
             <configuration>
               <targetClasses>
-
                 <param>org.apache.bookkeeper.bookie.storage.ldb.WriteCache</param>
                 <param>org.apache.bookkeeper.bookie.BufferedChannel</param>
-
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.bookie.storage.ldb.WriteCacheTests</param>
-                <param>org.apache.bookkeeper.bookie.BufferedChannelTests</param>
+                <param>org.apache.bookkeeper.bookie.storage.ldb.WriteCacheTests*</param>
+                <param>org.apache.bookkeeper.bookie.BufferedChannelTests*</param>
               </targetTests>
               <avoidCallsTo>
                 <avoidCallsTo>org.slf4j</avoidCallsTo>
@@ -510,7 +510,6 @@
               <historyInputFile>${pitest.history.file}</historyInputFile>
               <historyOutputFile>${pitest.history.file}</historyOutputFile>
             </configuration>
-
             <executions>
               <execution>
                 <id>Generate PIT report</id>
@@ -524,6 +523,5 @@
         </plugins>
       </build>
     </profile>
-
     </profiles>
 </project>

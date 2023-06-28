@@ -20,19 +20,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static org.apache.zookeeper.server.controller.ControllerConfigTest.createTempFile;
 
 @RunWith(value= Enclosed.class)
 public class BufferedChannelTests {
 
-    protected static ServerConfiguration serverConfigurationMock = Mockito.mock(ServerConfiguration.class);
-
-    protected static int WRITE_CAPACITY = 512;
+       protected static int WRITE_CAPACITY = 512;
     protected static int READ_CAPACITY = 512;
 
     @RunWith(Parameterized.class)
@@ -62,9 +59,9 @@ public class BufferedChannelTests {
         //constructor
         public writeTest(ByteBuf b, long expPos) throws IOException {
 
-
-            DefaultFileChannel defaultFileChannel = new DefaultFileChannel(new File("./target/example.txt"), serverConfigurationMock);
-            FileChannel fileChannel = defaultFileChannel.getFileChannel();
+            File tempFile = File.createTempFile("file", "log");
+            tempFile.deleteOnExit();
+            FileChannel fileChannel = new RandomAccessFile(tempFile, "rw").getChannel();
 
             this.buffChannel = new BufferedChannel(ByteBufAllocator.DEFAULT, fileChannel, WRITE_CAPACITY);
 
@@ -123,8 +120,9 @@ public class BufferedChannelTests {
 
         @Before
         public void writeOperation() throws IOException {
-            File log = createTempFile();
-            fileChannel = new RandomAccessFile(log, "rw").getChannel();
+            File tempFile = File.createTempFile("file", "log");
+            tempFile.deleteOnExit();
+            fileChannel = new RandomAccessFile(tempFile, "rw").getChannel();
             buffChannel = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fileChannel, WRITE_CAPACITY, READ_CAPACITY);
             ByteBuf writeBuf = Unpooled.buffer(WRITE_CAPACITY);
             byte[] data = new byte[WRITE_CAPACITY];
@@ -178,7 +176,7 @@ public class BufferedChannelTests {
 
     }
 
-/*
+
     //TEST CON APPROCCIO WHITE BOX
     @RunWith(Parameterized.class)
     public static class whiteboxReadTest {
@@ -203,7 +201,7 @@ public class BufferedChannelTests {
 
 
                     //nei precedenti casi di test ho preso un buffer con la stessa dimensione di byteBuf, ora lo prendo sia più piccolo che più grande
-                    //vedendo il codice capisco che lenght non è
+
                     //READ_CAPACITY             BYTE_BUFFER                                         POS                     LENGHT                     EXPECTED_RESULT      EXPECTED_EXCEPTIO
                     {false, Unpooled.buffer(WRITE_CAPACITY / 2), 0L, WRITE_CAPACITY, WRITE_CAPACITY, true},
 
@@ -237,10 +235,11 @@ public class BufferedChannelTests {
 
 
             this.expectedException = e;
-            //after looking at jacoco report I add these lines:
             if (!readNegative) {
-                File log = createTempFile();
-                fileChannel = new RandomAccessFile(log, "rw").getChannel();
+
+                File tempFile = File.createTempFile("file", "log");
+                tempFile.deleteOnExit();
+                FileChannel fileChannel = new RandomAccessFile(tempFile, "rw").getChannel();
                 buffChannel = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, fileChannel, WRITE_CAPACITY, READ_CAPACITY);
                 ByteBuf writeBuf = Unpooled.buffer(WRITE_CAPACITY);
                 byte[] data = new byte[WRITE_CAPACITY];
@@ -281,37 +280,50 @@ public class BufferedChannelTests {
     @RunWith(Parameterized.class)
     public static  class whiteboxWriteTests{
 
+        private final AtomicLong expectedUnpersistedBytes;
         private ByteBuf byteBuf;
 
         private BufferedChannel buffChannel;
         private long expectedPosition;
         private boolean expectedException;
+        @Before
+        public void init() throws IOException{
+            File tempFile = File.createTempFile("file", "log");
+            tempFile.deleteOnExit();
+            FileChannel fileChannel = new RandomAccessFile(tempFile, "rw").getChannel();
+            buffChannel=  new BufferedChannel(ByteBufAllocator.DEFAULT, fileChannel, WRITE_CAPACITY, READ_CAPACITY, 100);
+        }
+        @After
+        public void clear() throws IOException{
+            buffChannel.clear();
+            buffChannel.close();
+        }
         @Parameterized.Parameters
-        public static Collection<Object[][]> getParameter() throws IOException {
-            DefaultFileChannel defaultFileChannel= new DefaultFileChannel(new File("./target/example.txt"),serverConfigurationMock);
-            FileChannel fileChannel=defaultFileChannel.getFileChannel();
-            BufferedChannel buffChannel=  new BufferedChannel(ByteBufAllocator.DEFAULT, fileChannel, WRITE_CAPACITY, READ_CAPACITY, 100);
+        public static Collection<Object[][]> getParameter()  throws IOException{
 
-            ByteBuf byteBuf= Unpooled.wrappedBuffer(new byte[WRITE_CAPACITY*2]);
-            fileChannel.close();
+
+
+
 
             return Arrays.asList(new Object[][]{
                     //Unidimensional approach
-                    //BUFF_CHANNEL  CLOSE        BYTE BUFFER            EXPECTED_POSITION
+                    // BYTE BUFFER                                     EXPECTED_UNPERSISTED_BYTES
 
-                    {buffChannel,    true,      byteBuf ,               0    }
-
+                    //visto che UnpersistedBytesBound=100, doRegularFlushes=true
+                    {      Unpooled.wrappedBuffer(new byte[99]),            new AtomicLong(99)},
+                    {   Unpooled.wrappedBuffer(new byte[100]),           new AtomicLong(0)},
+                    {     Unpooled.wrappedBuffer(new byte[300]),         new AtomicLong(0)}
 
 
             });
         }
         //constructor
-        public whiteboxWriteTests( BufferedChannel buffChannel,boolean closeFileChannel, ByteBuf b, long expPos ){
-            this.buffChannel =buffChannel;
+        public whiteboxWriteTests(ByteBuf b, AtomicLong expUnpBytes ) throws IOException{
+
             this.byteBuf=b;
-            this.expectedPosition=expPos;
-            if(closeFileChannel==true){
-            this.expectedException=true;}
+
+            this.expectedUnpersistedBytes=expUnpBytes;
+
         }
         @Test
         public void whiteboxWriteTest() {
@@ -319,7 +331,7 @@ public class BufferedChannelTests {
 
                 try {
                     buffChannel.write(this.byteBuf);
-                    Assert.assertEquals(this.expectedPosition, buffChannel.position());
+                    Assert.assertEquals(this.expectedUnpersistedBytes.get(), buffChannel.unpersistedBytes.get());
                 }catch(IOException e){
                     Assert.assertTrue(this.expectedException);
                 }
@@ -327,5 +339,7 @@ public class BufferedChannelTests {
         }
 
 
-    }*/
+    }
+    
+
 }
